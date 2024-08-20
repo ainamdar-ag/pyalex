@@ -204,8 +204,10 @@ class OpenAlexAuth(AuthBase):
 class BaseOpenAlex:
     """Base class for OpenAlex objects."""
 
+    _requests_session = None
     def __init__(self, params=None):
         self.params = params
+        self._requests_session = _get_requests_session()
 
     def _get_multi_items(self, record_list):
         return self.filter(openalex_id="|".join(record_list)).get()
@@ -267,7 +269,7 @@ class BaseOpenAlex:
         return m["count"]
 
     def _get_from_url(self, url, return_meta=False):
-        res = _get_requests_session().get(url, auth=OpenAlexAuth(config))
+        res = self._requests_session.get(url, auth=OpenAlexAuth(config))
 
         # handle query errors
         if res.status_code == 403:
